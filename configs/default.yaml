@@ -1,0 +1,121 @@
+# MoE-RL 默认配置
+
+# 模型配置
+model:
+  model_name_or_path: "meta-llama/Llama-2-7b-hf"
+  trust_remote_code: false
+  use_fast_tokenizer: true
+  padding_side: "left"
+
+  # MoE 配置
+  moe:
+    enabled: false
+    num_experts: 8
+    top_k: 2
+    expert_hidden_size: 14336
+    load_balancing_loss_coef: 0.01
+    router_jitter_noise: 0.0
+
+# 训练配置
+training:
+  method: "grpo"  # ppo, grpo, dpo
+  output_dir: "./outputs"
+  num_train_epochs: 1
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8
+  learning_rate: 1.0e-6
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.1
+  max_grad_norm: 1.0
+  weight_decay: 0.0
+  seed: 42
+  bf16: true
+  tf32: true
+  gradient_checkpointing: true
+
+  # GRPO 特定
+  grpo:
+    group_size: 8
+    beta: 0.04
+    clip_eps: 0.2
+
+  # PPO 特定
+  ppo:
+    gamma: 1.0
+    lam: 0.95
+    cliprange: 0.2
+    vf_coef: 0.1
+    target_kl: 0.1
+
+# Rollout 配置
+rollout:
+  max_new_tokens: 1024
+  temperature: 1.0
+  top_p: 1.0
+  top_k: 0
+  do_sample: true
+  repetition_penalty: 1.0
+  num_return_sequences: 1
+
+  # 长尾采样
+  long_tail:
+    enabled: false
+    hard_example_ratio: 0.3
+    difficulty_metric: "reward"
+    difficulty_threshold: 0.3
+    pool_size: 10000
+
+# 数据集配置
+data:
+  task_type: "math"  # code, math, puzzle, general
+  dataset_name: "gsm8k"
+  dataset_config: "main"
+  train_split: "train"
+  eval_split: "test"
+  max_prompt_length: 512
+  max_response_length: 1024
+  num_proc: 4
+  cache_dir: null
+
+  # Code 数据集
+  code:
+    dataset: "humaneval"
+    language: "python"
+    timeout: 10
+
+  # Math 数据集
+  math:
+    dataset: "gsm8k"
+    answer_tolerance: 1.0e-4
+
+  # Puzzle 数据集
+  puzzle:
+    dataset: "arc"
+    bbh_task: "all"
+
+# 评估配置
+eval:
+  strategy: "steps"
+  eval_steps: 100
+  per_device_eval_batch_size: 4
+  num_eval_samples: 100
+  metrics: ["accuracy", "pass@1", "pass@5"]
+  save_best_model: true
+  greater_is_better: true
+
+# 日志配置
+logging:
+  level: "INFO"
+  log_dir: "./logs"
+  log_with: "wandb"
+  project_name: "moe-rl"
+  run_name: null
+  log_steps: 10
+  save_steps: 500
+  save_total_limit: 3
+
+# 分布式配置
+distributed:
+  distributed_type: "multi_gpu"
+  num_processes: 1
+  main_process_port: 29500
