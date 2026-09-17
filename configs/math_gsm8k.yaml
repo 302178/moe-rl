@@ -1,0 +1,36 @@
+# Math GSM8K 训练配置
+
+defaults:
+  - default
+
+data:
+  task_type: "math"
+  dataset_name: "gsm8k"
+  dataset_config: "main"
+  train_split: "train"
+  eval_split: "test"
+  max_prompt_length: 256
+  max_response_length: 512
+
+rollout:
+  max_new_tokens: 512
+  temperature: 1.0
+  do_sample: true
+
+training:
+  method: "grpo"
+  learning_rate: 5.0e-7
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8
+  num_train_epochs: 1
+
+  grpo:
+    group_size: 8
+    beta: 0.04
+
+eval:
+  num_eval_samples: 200
+  metrics: ["accuracy", "pass@1", "pass@5", "pass@10"]
+
+logging:
+  run_name: "moe-rl-gsm8k"
