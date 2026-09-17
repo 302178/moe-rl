@@ -1,0 +1,41 @@
+# Code HumanEval 训练配置
+
+defaults:
+  - default
+
+data:
+  task_type: "code"
+  dataset_name: "openai/openai_humaneval"
+  train_split: "test"
+  eval_split: "test"
+  max_prompt_length: 512
+  max_response_length: 1024
+
+  code:
+    dataset: "humaneval"
+    language: "python"
+    timeout: 10
+
+rollout:
+  max_new_tokens: 1024
+  temperature: 0.8
+  top_p: 0.95
+  do_sample: true
+
+training:
+  method: "grpo"
+  learning_rate: 1.0e-6
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8
+  num_train_epochs: 1
+
+  grpo:
+    group_size: 8
+    beta: 0.04
+
+eval:
+  num_eval_samples: 164
+  metrics: ["pass@1", "pass@5", "pass@10"]
+
+logging:
+  run_name: "moe-rl-humaneval"
